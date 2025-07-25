@@ -46,21 +46,30 @@ export default function SiteAnalysisReport() {
         // Get analysis token from URL
         const urlParams = new URLSearchParams(window.location.search)
         const analysisToken = Array.from(urlParams.keys()).find(key => key.startsWith('test'))
-        const targetWebsite = analysisToken ? urlParams.get(analysisToken) : null
+        const targetWebsite = analysisToken ? decodeURIComponent(urlParams.get(analysisToken) || '') : null
 
-        if (!targetWebsite) {
+        if (!targetWebsite || !analysisToken) {
           setLoading(false)
           return
         }
 
         setWebsiteUrl(targetWebsite)
 
-        // Find analysis data
-        const analyses = await blink.db.siteAnalysis.list({
-          where: { websiteUrl: targetWebsite },
+        // Find analysis data by token first, then by website URL
+        let analyses = await blink.db.siteAnalysis.list({
+          where: { analysisToken: analysisToken },
           orderBy: { reportGeneratedAt: 'desc' },
           limit: 1
         })
+
+        // If not found by token, try by website URL
+        if (analyses.length === 0) {
+          analyses = await blink.db.siteAnalysis.list({
+            where: { websiteUrl: targetWebsite },
+            orderBy: { reportGeneratedAt: 'desc' },
+            limit: 1
+          })
+        }
 
         if (analyses.length > 0) {
           const analysis = analyses[0]
@@ -414,11 +423,26 @@ export default function SiteAnalysisReport() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-              <Button size="lg" className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 text-lg">
+              <Button 
+                size="lg" 
+                className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 text-lg"
+                onClick={() => {
+                  // Scroll to contact form or redirect to landing page
+                  window.location.href = '/#contact'
+                }}
+              >
                 Get Free Optimization Consultation
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 text-lg">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 text-lg"
+                onClick={() => {
+                  // Generate and download a PDF report (placeholder)
+                  window.print()
+                }}
+              >
                 Download Full Report
               </Button>
             </div>

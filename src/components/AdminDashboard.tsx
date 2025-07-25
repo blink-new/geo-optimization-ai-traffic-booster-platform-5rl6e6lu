@@ -30,6 +30,7 @@ import {
 } from 'lucide-react'
 import { blink } from '../blink/client'
 import { useToast } from '../hooks/use-toast'
+import ProposalModal from './ProposalModal'
 
 interface Customer {
   id: string
@@ -79,6 +80,8 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
+  const [proposalModalOpen, setProposalModalOpen] = useState(false)
+  const [proposalCustomer, setProposalCustomer] = useState<Customer | null>(null)
   const [newService, setNewService] = useState({
     serviceName: '',
     serviceDescription: '',
@@ -226,6 +229,23 @@ export default function AdminDashboard() {
   const viewReport = (analysis: SiteAnalysis) => {
     const reportUrl = generateReportUrl(analysis)
     window.location.href = reportUrl
+  }
+
+  const openProposalModal = (customer: Customer) => {
+    setProposalCustomer(customer)
+    setProposalModalOpen(true)
+  }
+
+  const getAnalysisDataForCustomer = (customer: Customer) => {
+    const analysis = analyses.find(a => a.customerId === customer.id)
+    if (!analysis) return undefined
+    
+    return {
+      trafficLossPercentage: analysis.trafficLossPercentage,
+      estimatedMonthlyLoss: analysis.estimatedMonthlyLoss,
+      technicalErrors: analysis.technicalErrors,
+      contentIssues: analysis.contentIssues
+    }
   }
 
   const filteredCustomers = customers.filter(customer => {
@@ -458,7 +478,11 @@ export default function AdminDashboard() {
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              <Button size="sm" variant="outline">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => openProposalModal(customer)}
+                              >
                                 <Mail className="h-4 w-4" />
                               </Button>
                             </div>
@@ -735,7 +759,14 @@ export default function AdminDashboard() {
                   <Mail className="h-4 w-4 mr-2" />
                   Send Email
                 </Button>
-                <Button variant="outline" className="flex-1">
+                <Button 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => {
+                    setSelectedCustomer(null)
+                    openProposalModal(selectedCustomer!)
+                  }}
+                >
                   <Send className="h-4 w-4 mr-2" />
                   Send Proposal
                 </Button>
@@ -744,6 +775,18 @@ export default function AdminDashboard() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Proposal Modal */}
+      <ProposalModal
+        isOpen={proposalModalOpen}
+        onClose={() => {
+          setProposalModalOpen(false)
+          setProposalCustomer(null)
+          loadDashboardData() // Refresh data after proposal sent
+        }}
+        customer={proposalCustomer}
+        analysisData={proposalCustomer ? getAnalysisDataForCustomer(proposalCustomer) : undefined}
+      />
     </div>
   )
 }
