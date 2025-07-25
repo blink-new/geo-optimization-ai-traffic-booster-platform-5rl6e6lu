@@ -19,16 +19,37 @@ function App() {
   }, [])
 
   useEffect(() => {
-    // Check URL parameters to determine view
-    const urlParams = new URLSearchParams(window.location.search)
-    const analysisToken = Array.from(urlParams.keys()).find(key => key.startsWith('test'))
+    const checkCurrentView = () => {
+      // Check URL parameters to determine view
+      const urlParams = new URLSearchParams(window.location.search)
+      const analysisToken = Array.from(urlParams.keys()).find(key => key.startsWith('test'))
+      
+      if (analysisToken && urlParams.get(analysisToken)) {
+        setCurrentView('analysis')
+      } else if (window.location.pathname.includes('/admin') || window.location.hash.includes('admin')) {
+        setCurrentView('admin')
+      } else {
+        setCurrentView('landing')
+      }
+    }
+
+    checkCurrentView()
+
+    // Listen for URL changes
+    const handlePopState = () => {
+      checkCurrentView()
+    }
+
+    const handleHashChange = () => {
+      checkCurrentView()
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    window.addEventListener('hashchange', handleHashChange)
     
-    if (analysisToken && urlParams.get(analysisToken)) {
-      setCurrentView('analysis')
-    } else if (window.location.pathname.includes('/admin')) {
-      setCurrentView('admin')
-    } else {
-      setCurrentView('landing')
+    return () => {
+      window.removeEventListener('popstate', handlePopState)
+      window.removeEventListener('hashchange', handleHashChange)
     }
   }, [])
 

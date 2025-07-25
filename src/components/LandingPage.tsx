@@ -52,30 +52,44 @@ export default function LandingPage() {
         websiteUrl: contactForm.websiteUrl,
         contactEmail: contactForm.contactEmail,
         contactName: contactForm.contactName,
-        status: 'lead'
+        industry: 'General',
+        currentMonthlyTraffic: Math.floor(Math.random() * 50000) + 10000,
+        estimatedTrafficLoss: Math.floor(Math.random() * 50000) + 10000,
+        optimizationScore: Math.floor(Math.random() * 30) + 20,
+        status: 'lead',
+        createdAt: new Date().toISOString()
       })
 
       // Create site analysis record
+      const seoScore = Math.floor(Math.random() * 40) + 30 // 30-70
+      const aiOptimizationScore = Math.floor(Math.random() * 30) + 20 // 20-50
+      const technicalErrors = Math.floor(Math.random() * 15) + 5 // 5-20
+      const contentIssues = Math.floor(Math.random() * 10) + 3 // 3-13
+      const trafficLossPercentage = Math.floor(Math.random() * 40) + 30 // 30-70%
+      const estimatedMonthlyLoss = Math.floor(Math.random() * 50000) + 10000 // $10k-60k
+      const korayFrameworkCompliance = Math.floor(Math.random() * 25) + 15 // 15-40%
+
       await blink.db.siteAnalysis.create({
         id: `analysis_${Date.now()}`,
         customerId,
         userId: user.id,
         websiteUrl: contactForm.websiteUrl,
         analysisToken,
-        seoScore: Math.floor(Math.random() * 40) + 30, // 30-70
-        aiOptimizationScore: Math.floor(Math.random() * 30) + 20, // 20-50
-        technicalErrors: Math.floor(Math.random() * 15) + 5, // 5-20
-        contentIssues: Math.floor(Math.random() * 10) + 3, // 3-13
-        trafficLossPercentage: Math.floor(Math.random() * 40) + 30, // 30-70%
-        estimatedMonthlyLoss: Math.floor(Math.random() * 50000) + 10000, // $10k-60k
-        korayFrameworkCompliance: Math.floor(Math.random() * 25) + 15, // 15-40%
+        seoScore,
+        aiOptimizationScore,
+        technicalErrors,
+        contentIssues,
+        trafficLossPercentage,
+        estimatedMonthlyLoss,
+        korayFrameworkCompliance,
         recommendations: JSON.stringify([
           'Implement AI-first content optimization',
           'Add structured data for AI engines',
           'Optimize for voice search queries',
           'Improve entity recognition',
           'Enhance topical authority'
-        ])
+        ]),
+        reportGeneratedAt: new Date().toISOString()
       })
 
       // Generate personalized URL
@@ -116,7 +130,7 @@ export default function LandingPage() {
               <Bot className="h-8 w-8 text-blue-600" />
               <span className="text-xl font-bold text-gray-900">AI Geo Optimizer</span>
             </div>
-            <Button variant="outline" onClick={() => window.location.href = '/admin'}>
+            <Button variant="outline" onClick={() => window.location.href = '/#admin'}>
               Admin Dashboard
             </Button>
           </div>

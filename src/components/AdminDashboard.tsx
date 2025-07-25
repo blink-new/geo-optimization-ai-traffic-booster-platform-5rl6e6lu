@@ -223,6 +223,11 @@ export default function AdminDashboard() {
     return `${window.location.origin}/?${analysis.analysisToken}=${encodeURIComponent(analysis.websiteUrl)}`
   }
 
+  const viewReport = (analysis: SiteAnalysis) => {
+    const reportUrl = generateReportUrl(analysis)
+    window.location.href = reportUrl
+  }
+
   const filteredCustomers = customers.filter(customer => {
     const matchesSearch = customer.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          customer.contactEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -531,7 +536,7 @@ export default function AdminDashboard() {
                             <Button 
                               size="sm" 
                               variant="outline"
-                              onClick={() => window.open(generateReportUrl(analysis), '_blank')}
+                              onClick={() => viewReport(analysis)}
                             >
                               <Eye className="h-4 w-4 mr-1" />
                               View Report
